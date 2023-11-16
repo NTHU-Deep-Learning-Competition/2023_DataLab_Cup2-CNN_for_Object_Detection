@@ -2,6 +2,57 @@ from rembg import remove
 import cv2 as cv
 from matplotlib import pyplot as plt
 import numpy as np
+from collections import defaultdict
+import os
+
+
+def cut_bboxs(training_annotation_path, training_images_dir):
+    classes_name =  ["aeroplane", "bicycle", "bird", "boat", "bottle", 
+                 "bus", "car", "cat", "chair", "cow", "diningtable", 
+                 "dog", "horse", "motorbike", "person", "pottedplant", 
+                 "sheep", "sofa", "train","tvmonitor"]
+    
+    # 使用defaultdict初始化，設置默認值為int的0
+    class_counts = defaultdict(int)
+    
+    # 建立bboxs資料夾
+    bboxs_folder = './bboxs/'
+    if not os.path.exists(bboxs_folder):
+        os.makedirs(bboxs_folder)
+        for c in classes_name:
+            sub_folder_path = os.path.join(bboxs_folder, c)
+            os.makedirs(sub_folder_path)
+            print(f"Subfolder '{sub_folder_path}' created successfully.")
+    else:
+        print(f"Folder '{bboxs_folder}' already exists.")
+
+
+    input_file = open(training_annotation_path, 'r')
+    for line in input_file:
+        line = line.strip()
+        info = line.split(' ')
+
+        # image name
+        image_name = info[0]
+        image_path = training_images_dir + image_name
+        # print("image_path:", image_path)
+        # display.display(display.Image(image_path, width=200, height=200))
+        image = cv.imread(image_path)
+        
+        # bounding boxs
+        bounding_boxes = [int(num) for num in info[1:]]
+        bounding_boxes = [bounding_boxes[i:i + 5] for i in range(0, len(bounding_boxes), 5)]
+        # print(bounding_boxes)
+        
+        for i, bbox in enumerate(bounding_boxes):
+            x_min, y_min, x_max, y_max, class_label = bbox
+            cropped_image = image[y_min:y_max, x_min:x_max]
+            cv.imwrite(f'./{bboxs_folder}/{classes_name[class_label]}/{image_name[:-4]}_{i+1}.jpg', cropped_image)
+            # print(classes_name[class_label])
+            class_counts[classes_name[class_label]] += 1
+    return class_counts
+        
+
  
 def add_alpha_channel(img):
     """ 为jpg图像添加alpha通道 """
@@ -110,14 +161,19 @@ def copy_and_paste(background_path, origin_sticker_path, sticker_path, output_pa
     return new_img, sticker_x_min, sticker_x_max, sticker_y_min, sticker_y_max
 
 
-background_path = './dataset/VOCdevkit_train/VOC2007/JPEGImages/000009.jpg'
-origin_sticker_path = './dataset/VOCdevkit_train/VOC2007/JPEGImages/000007.jpg'
-sticker_path = './output_car.png'
-new_img_path = './new_img.jpg'
-new_width_sticker = 300
-x_pos = 155
-y_pos = 200
-# _ = _paste_image(background_path = background_path,sticker_path = sticker_path ,new_img_path = new_img_path , new_width_sticker=300, x_pos = 155, y_pos = 200)
-new_img, sticker_x_min, sticker_x_max, sticker_y_min, sticker_y_max = copy_and_paste(background_path, origin_sticker_path, sticker_path, new_img_path, new_width_sticker, x_pos, y_pos)
-plt.imshow(cv.cvtColor(new_img, cv.COLOR_BGR2RGB))
-plt.show()
+if __name__=="__main__":
+    # background_path = './dataset/VOCdevkit_train/VOC2007/JPEGImages/000009.jpg'
+    # origin_sticker_path = './dataset/VOCdevkit_train/VOC2007/JPEGImages/000007.jpg'
+    # sticker_path = './output_car.png'
+    # new_img_path = './new_img.jpg'
+    # new_width_sticker = 300
+    # x_pos = 155
+    # y_pos = 200
+    # # _ = _paste_image(background_path = background_path,sticker_path = sticker_path ,new_img_path = new_img_path , new_width_sticker=300, x_pos = 155, y_pos = 200)
+    # new_img, sticker_x_min, sticker_x_max, sticker_y_min, sticker_y_max = copy_and_paste(background_path, origin_sticker_path, sticker_path, new_img_path, new_width_sticker, x_pos, y_pos)
+    # plt.imshow(cv.cvtColor(new_img, cv.COLOR_BGR2RGB))
+    # plt.show()
+
+    training_annotation_path = '/home/s111062588/Deep-Learning/Competition/Comp02/pascal_voc_training_data.txt'
+    training_images_dir = '/home/s111062588/Deep-Learning/Competition/Comp02/VOCdevkit_train/VOC2007/JPEGImages/'
+    cut_bboxs(training_annotation_path, training_images_dir)
