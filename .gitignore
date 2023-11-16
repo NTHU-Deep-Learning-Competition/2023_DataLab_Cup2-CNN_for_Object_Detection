@@ -2,3 +2,10 @@ ckpts/
 dataset/
 Eric/
 __pycache__
+bboxs/
+notebook.ipynb
+copy_paste.ipynb
+*.csv
+*.jpg
+*.png
+*.txt
