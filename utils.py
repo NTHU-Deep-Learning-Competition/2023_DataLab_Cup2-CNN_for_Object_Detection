@@ -228,7 +228,7 @@ def copy_and_paste(background_path, origin_sticker_path, sticker_path, output_pa
     return new_img, sticker_x_min, sticker_x_max, sticker_y_min, sticker_y_max
 
 
-if __name__=="__main__":
+# if __name__=="__main__":
     # background_path = './dataset/VOCdevkit_train/VOC2007/JPEGImages/000009.jpg'
     # origin_sticker_path = './dataset/VOCdevkit_train/VOC2007/JPEGImages/000007.jpg'
     # sticker_path = './output_car.png'
