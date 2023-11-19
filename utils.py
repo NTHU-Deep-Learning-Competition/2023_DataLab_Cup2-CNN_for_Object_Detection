@@ -48,7 +48,7 @@ def cut_bboxs(training_annotation_path, training_images_dir):
         # image name
         image_name = info[0]
         image_path = training_images_dir + image_name
-        print("image_path:", image_path, end='\r')
+        # print("image_path:", image_path, end='\r')
         # display.display(display.Image(image_path, width=200, height=200))
         image = cv.imread(image_path)
         
@@ -71,7 +71,7 @@ def cut_bboxs(training_annotation_path, training_images_dir):
             
             # print(classes_name[class_label])
             class_counts[classes_name[class_label]] += 1
-        
+
     return class_counts, image_name_dict
 
 
@@ -97,7 +97,7 @@ def count_bboxs(training_annotation_path, training_images_dir):
         image_path = training_images_dir + image_name
         # print("image_path:", image_path, end='\r')
         # display.display(display.Image(image_path, width=200, height=200))
-        
+     
         # bounding boxs
         bounding_boxes = [int(num) for num in info[1:]]
         bounding_boxes = [bounding_boxes[i:i + 5] for i in range(0, len(bounding_boxes), 5)]
@@ -108,7 +108,7 @@ def count_bboxs(training_annotation_path, training_images_dir):
             x_min, y_min, x_max, y_max, class_label = bbox
             # print(classes_name[class_label])
             class_counts[classes_name[class_label]] += 1
-        
+
     return class_counts, image_name_dict
 
  
@@ -240,7 +240,8 @@ def copy_and_paste(background_path, origin_sticker_path, sticker_path, output_pa
     # new_img, sticker_x_min, sticker_x_max, sticker_y_min, sticker_y_max = copy_and_paste(background_path, origin_sticker_path, sticker_path, new_img_path, new_width_sticker, x_pos, y_pos)
     # plt.imshow(cv.cvtColor(new_img, cv.COLOR_BGR2RGB))
     # plt.show()
-
     # training_annotation_path = '/home/s111062588/Deep-Learning/Competition/Comp02/pascal_voc_training_data.txt'
     # training_images_dir = '/home/s111062588/Deep-Learning/Competition/Comp02/VOCdevkit_train/VOC2007/JPEGImages/'
     # cut_bboxs(training_annotation_path, training_images_dir)
+    # count_bboxs(training_annotation_path, training_images_dir)
+
