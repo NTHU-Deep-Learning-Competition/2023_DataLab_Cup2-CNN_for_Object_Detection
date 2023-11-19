@@ -9,15 +9,12 @@ VOCdevkit_train
 
 __pycache__
 bboxs/
-<<<<<<< HEAD
 reference/
 Comp02_tutorial.ipynb
 data_aug/
-=======
 notebook.ipynb
 copy_paste.ipynb
 *.csv
 *.jpg
 *.png
 *.txt
->>>>>>> 0960387ed591147525fe568296c72331192a94eb
