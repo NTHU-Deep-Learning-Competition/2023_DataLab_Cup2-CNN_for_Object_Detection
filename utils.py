@@ -14,19 +14,32 @@ def cut_bboxs(training_annotation_path, training_images_dir):
     
     # 使用defaultdict初始化，設置默認值為int的0
     class_counts = defaultdict(int)
+    image_name_dict = defaultdict(None)
+    
     
     # 建立bboxs資料夾
-    bboxs_folder = './bboxs/'
-    if not os.path.exists(bboxs_folder):
-        os.makedirs(bboxs_folder)
+    original_stickers_folder = './bboxs/origial_stickers/'
+    if not os.path.exists(original_stickers_folder):
+        os.makedirs(original_stickers_folder)
         for c in classes_name:
-            sub_folder_path = os.path.join(bboxs_folder, c)
+            sub_folder_path = os.path.join(original_stickers_folder, c)
             os.makedirs(sub_folder_path)
             print(f"Subfolder '{sub_folder_path}' created successfully.")
     else:
-        print(f"Folder '{bboxs_folder}' already exists.")
+        print(f"Folder '{original_stickers_folder}' already exists.")
+    
+    rmbg_stickers_folder = './bboxs/rmbg_stickers/'
+    if not os.path.exists(rmbg_stickers_folder):
+        os.makedirs(rmbg_stickers_folder)
+        for c in classes_name:
+            sub_folder_path = os.path.join(rmbg_stickers_folder, c)
+            os.makedirs(sub_folder_path)
+            print(f"Subfolder '{sub_folder_path}' created successfully.")
+    else:
+        print(f"Folder '{rmbg_stickers_folder}' already exists.")
 
 
+    # 讀取 pascal
     input_file = open(training_annotation_path, 'r')
     for line in input_file:
         line = line.strip()
@@ -35,7 +48,7 @@ def cut_bboxs(training_annotation_path, training_images_dir):
         # image name
         image_name = info[0]
         image_path = training_images_dir + image_name
-        # print("image_path:", image_path)
+        print("image_path:", image_path, end='\r')
         # display.display(display.Image(image_path, width=200, height=200))
         image = cv.imread(image_path)
         
@@ -43,34 +56,80 @@ def cut_bboxs(training_annotation_path, training_images_dir):
         bounding_boxes = [int(num) for num in info[1:]]
         bounding_boxes = [bounding_boxes[i:i + 5] for i in range(0, len(bounding_boxes), 5)]
         # print(bounding_boxes)
+        image_name_dict[image_name] = bounding_boxes
         
         for i, bbox in enumerate(bounding_boxes):
             x_min, y_min, x_max, y_max, class_label = bbox
+            
+            # 產生 stickers
             cropped_image = image[y_min:y_max, x_min:x_max]
-            cv.imwrite(f'./{bboxs_folder}/{classes_name[class_label]}/{image_name[:-4]}_{i+1}.jpg', cropped_image)
+            cv.imwrite(f'./{original_stickers_folder}/{classes_name[class_label]}/{image_name[:-4]}_{i+1}.jpg', cropped_image)
+            
+            # 去除 stickers 背景
+            cropped_image_rmbg = remove(cropped_image)
+            cv.imwrite(f'./{rmbg_stickers_folder}/{classes_name[class_label]}/{image_name[:-4]}_{i+1}.jpg', cropped_image_rmbg)
+            
             # print(classes_name[class_label])
             class_counts[classes_name[class_label]] += 1
-    return class_counts
         
+    return class_counts, image_name_dict
+
+
+def count_bboxs(training_annotation_path, training_images_dir):
+    classes_name =  ["aeroplane", "bicycle", "bird", "boat", "bottle", 
+                 "bus", "car", "cat", "chair", "cow", "diningtable", 
+                 "dog", "horse", "motorbike", "person", "pottedplant", 
+                 "sheep", "sofa", "train","tvmonitor"]
+    
+    # 使用defaultdict初始化，設置默認值為int的0
+    class_counts = defaultdict(int)
+    image_name_dict = defaultdict(None)
+    
+
+    # 讀取 pascal
+    input_file = open(training_annotation_path, 'r')
+    for line in input_file:
+        line = line.strip()
+        info = line.split(' ')
+
+        # image name
+        image_name = info[0]
+        image_path = training_images_dir + image_name
+        # print("image_path:", image_path, end='\r')
+        # display.display(display.Image(image_path, width=200, height=200))
+        
+        # bounding boxs
+        bounding_boxes = [int(num) for num in info[1:]]
+        bounding_boxes = [bounding_boxes[i:i + 5] for i in range(0, len(bounding_boxes), 5)]
+        # print(bounding_boxes)
+        image_name_dict[image_name] = bounding_boxes
+        
+        for i, bbox in enumerate(bounding_boxes):
+            x_min, y_min, x_max, y_max, class_label = bbox
+            # print(classes_name[class_label])
+            class_counts[classes_name[class_label]] += 1
+        
+    return class_counts, image_name_dict
 
  
-def add_alpha_channel(img):
-    """ 为jpg图像添加alpha通道 """
+def _add_alpha_channel(img):
+    """ Add an alpha channel to a jpg image."""
  
-    b_channel, g_channel, r_channel = cv.split(img) # 剥离jpg图像通道
-    alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255 # 创建Alpha通道
+    b_channel, g_channel, r_channel = cv.split(img)  # Split channels of the jpg image
+    alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255  # Create an Alpha channel
  
-    img_new = cv.merge((b_channel, g_channel, r_channel, alpha_channel)) # 融合通道
+    img_new = cv.merge((b_channel, g_channel, r_channel, alpha_channel))  # Merge channels
     return img_new
+
 
 def merge_images_with_transparency(background, foreground_with_alpha, top, bottom, left, right):
     """將具有透明通道的前景 PNG 圖像合併到背景 JPG 圖像上
-       top, bottom, left, right 為叠加位置坐标值
+       top, bottom, left, right 為叠加位置坐座標值
     """
 
     # 檢查背景圖像是否為 4 通道
     if background.shape[2] == 3:
-        background = add_alpha_channel(background)
+        background = _add_alpha_channel(background)
     
     '''
     當進行圖像合併時，由於位置可能設置不當，可能會導致前景 PNG 圖像的邊界超過背景 JPG 圖像，
@@ -108,7 +167,10 @@ def merge_images_with_transparency(background, foreground_with_alpha, top, botto
     return image_copy
 
 
+
 def copy_from_image(input_path, output_path): # input could be jpg file, but output should be png file
+    """ 將 sticker 去背存檔"""
+    
     input = cv.imread(input_path)
     output = remove(input)
     cv.imwrite(output_path, output)
@@ -120,7 +182,8 @@ def copy_from_image(input_path, output_path): # input could be jpg file, but out
     # plt.show()
     return output
 
-def resize_with_aspect_ratio(image, new_width):
+
+def _resize_with_aspect_ratio(image, new_width):
     # 獲取原始圖片的高度、寬度和通道數
     height, width = image.shape[:2]
     
@@ -134,10 +197,12 @@ def resize_with_aspect_ratio(image, new_width):
     return resized_image
 
 
-def _paste_image(background_path, sticker_path, new_img_path,new_width_sticker, x_pos, y_pos):
+def paste_image(background_path, sticker_path, new_img_path,new_width_sticker, x_pos, y_pos):
+    """將去背的 sticker 貼到背景圖片"""
+    
     background = cv.imread(background_path)
     sticker = cv.imread(sticker_path, cv.IMREAD_UNCHANGED)
-    resized_sticker = resize_with_aspect_ratio(sticker, new_width_sticker)
+    resized_sticker = _resize_with_aspect_ratio(sticker, new_width_sticker)
     sticker_x_min = x_pos
     sticker_x_max = x_pos + resized_sticker.shape[0]
     sticker_y_min = y_pos
@@ -155,9 +220,11 @@ def _paste_image(background_path, sticker_path, new_img_path,new_width_sticker, 
     return new_img, sticker_x_min, sticker_x_max, sticker_y_min, sticker_y_max
     # return new_img, x_min,
 
+
+
 def copy_and_paste(background_path, origin_sticker_path, sticker_path, output_path, new_width_sticker, x_pos, y_pos):
     copy_from_image(origin_sticker_path, sticker_path) # remove_background from input_path and save it into sticker path
-    new_img, sticker_x_min, sticker_x_max, sticker_y_min, sticker_y_max = _paste_image(background_path = background_path, sticker_path = sticker_path, new_img_path = output_path, new_width_sticker=300, x_pos = 155, y_pos = 200)
+    new_img, sticker_x_min, sticker_x_max, sticker_y_min, sticker_y_max = paste_image(background_path = background_path, sticker_path = sticker_path, new_img_path = output_path, new_width_sticker=300, x_pos = 155, y_pos = 200)
     return new_img, sticker_x_min, sticker_x_max, sticker_y_min, sticker_y_max
 
 
