@@ -50,6 +50,7 @@ def cut_bboxs(training_annotation_path, training_images_dir):
         image_path = training_images_dir + image_name
         print("image_path:", image_path, end='\r')
         # display.display(display.Image(image_path, width=200, height=200))
+        image = cv.imread(image_path)
         
         # bounding boxs
         bounding_boxes = [int(num) for num in info[1:]]
@@ -96,7 +97,6 @@ def count_bboxs(training_annotation_path, training_images_dir):
         image_path = training_images_dir + image_name
         # print("image_path:", image_path, end='\r')
         # display.display(display.Image(image_path, width=200, height=200))
-        image = cv.imread(image_path)
         
         # bounding boxs
         bounding_boxes = [int(num) for num in info[1:]]
