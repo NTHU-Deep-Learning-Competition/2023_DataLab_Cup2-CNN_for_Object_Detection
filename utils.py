@@ -174,6 +174,6 @@ if __name__=="__main__":
     # plt.imshow(cv.cvtColor(new_img, cv.COLOR_BGR2RGB))
     # plt.show()
 
-    training_annotation_path = '/home/s111062588/Deep-Learning/Competition/Comp02/pascal_voc_training_data.txt'
-    training_images_dir = '/home/s111062588/Deep-Learning/Competition/Comp02/VOCdevkit_train/VOC2007/JPEGImages/'
-    cut_bboxs(training_annotation_path, training_images_dir)
+    # training_annotation_path = '/home/s111062588/Deep-Learning/Competition/Comp02/pascal_voc_training_data.txt'
+    # training_images_dir = '/home/s111062588/Deep-Learning/Competition/Comp02/VOCdevkit_train/VOC2007/JPEGImages/'
+    # cut_bboxs(training_annotation_path, training_images_dir)
