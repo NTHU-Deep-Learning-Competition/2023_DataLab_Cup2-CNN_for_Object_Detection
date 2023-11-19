@@ -54,7 +54,7 @@ def cut_bboxs(training_annotation_path, training_images_dir):
         
 
  
-def add_alpha_channel(img):
+def _add_alpha_channel(img):
     """ 为jpg图像添加alpha通道 """
  
     b_channel, g_channel, r_channel = cv.split(img) # 剥离jpg图像通道
@@ -70,7 +70,7 @@ def merge_images_with_transparency(background, foreground_with_alpha, top, botto
 
     # 檢查背景圖像是否為 4 通道
     if background.shape[2] == 3:
-        background = add_alpha_channel(background)
+        background = _add_alpha_channel(background)
     
     '''
     當進行圖像合併時，由於位置可能設置不當，可能會導致前景 PNG 圖像的邊界超過背景 JPG 圖像，
@@ -108,6 +108,8 @@ def merge_images_with_transparency(background, foreground_with_alpha, top, botto
     return image_copy
 
 
+
+# 將 sticker 去背存檔
 def copy_from_image(input_path, output_path): # input could be jpg file, but output should be png file
     input = cv.imread(input_path)
     output = remove(input)

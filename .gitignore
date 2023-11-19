@@ -1,5 +1,14 @@
 ckpts/
 dataset/
 Eric/
+
+VOCdevkit_test
+VOCdevkit_train
+*.txt
+*.csv
+
 __pycache__
 bboxs/
+reference/
+Comp02_tutorial.ipynb
+data_aug/
