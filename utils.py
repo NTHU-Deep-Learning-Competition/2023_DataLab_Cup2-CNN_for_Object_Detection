@@ -6,7 +6,19 @@ from collections import defaultdict
 import os
 
 
-def cut_bboxs(training_annotation_path, training_images_dir):
+def _make_stickers_folder(stickers_root_dir, classes_name):
+    if not os.path.exists(stickers_root_dir):
+        os.makedirs(stickers_root_dir)
+        for c in classes_name:
+            sub_folder_path = os.path.join(stickers_root_dir, c)
+            os.makedirs(sub_folder_path)
+            print(f"Subfolder '{sub_folder_path}' created successfully.")
+    else:
+        print(f"Folder '{stickers_root_dir}' already exists.")
+
+
+
+def cut_bboxes(training_annotation_path, training_images_dir, original_stickers_root_dir):
     classes_name =  ["aeroplane", "bicycle", "bird", "boat", "bottle", 
                  "bus", "car", "cat", "chair", "cow", "diningtable", 
                  "dog", "horse", "motorbike", "person", "pottedplant", 
@@ -16,27 +28,10 @@ def cut_bboxs(training_annotation_path, training_images_dir):
     class_counts = defaultdict(int)
     image_name_dict = defaultdict(None)
     
-    
-    # 建立bboxs資料夾
-    original_stickers_folder = './bboxs/origial_stickers/'
-    if not os.path.exists(original_stickers_folder):
-        os.makedirs(original_stickers_folder)
-        for c in classes_name:
-            sub_folder_path = os.path.join(original_stickers_folder, c)
-            os.makedirs(sub_folder_path)
-            print(f"Subfolder '{sub_folder_path}' created successfully.")
-    else:
-        print(f"Folder '{original_stickers_folder}' already exists.")
-    
-    rmbg_stickers_folder = './bboxs/rmbg_stickers/'
-    if not os.path.exists(rmbg_stickers_folder):
-        os.makedirs(rmbg_stickers_folder)
-        for c in classes_name:
-            sub_folder_path = os.path.join(rmbg_stickers_folder, c)
-            os.makedirs(sub_folder_path)
-            print(f"Subfolder '{sub_folder_path}' created successfully.")
-    else:
-        print(f"Folder '{rmbg_stickers_folder}' already exists.")
+    # 建立stickers資料夾
+    _make_stickers_folder(original_stickers_root_dir, classes_name)
+    # rmbg_stickers_root_dir = './bboxs/rmbg_stickers/'
+    # _make_stickers_folder(rmbg_stickers_root_dir, classes_name)
 
 
     # 讀取 pascal
@@ -63,11 +58,11 @@ def cut_bboxs(training_annotation_path, training_images_dir):
             
             # 產生 stickers
             cropped_image = image[y_min:y_max, x_min:x_max]
-            cv.imwrite(f'./{original_stickers_folder}/{classes_name[class_label]}/{image_name[:-4]}_{i+1}.jpg', cropped_image)
+            cv.imwrite(f'./{original_stickers_root_dir}/{classes_name[class_label]}/{image_name[:-4]}_{i+1}.jpg', cropped_image)
             
-            # 去除 stickers 背景
-            cropped_image_rmbg = remove(cropped_image)
-            cv.imwrite(f'./{rmbg_stickers_folder}/{classes_name[class_label]}/{image_name[:-4]}_{i+1}.jpg', cropped_image_rmbg)
+            # # 去除 stickers 背景
+            # cropped_image_rmbg = remove(cropped_image)
+            # cv.imwrite(f'./{rmbg_stickers_root_dir}/{classes_name[class_label]}/{image_name[:-4]}_{i+1}.jpg', cropped_image_rmbg)
             
             # print(classes_name[class_label])
             class_counts[classes_name[class_label]] += 1
@@ -75,7 +70,7 @@ def cut_bboxs(training_annotation_path, training_images_dir):
     return class_counts, image_name_dict
 
 
-def count_bboxs(training_annotation_path, training_images_dir):
+def count_bboxes(training_annotation_path, training_images_dir):
     classes_name =  ["aeroplane", "bicycle", "bird", "boat", "bottle", 
                  "bus", "car", "cat", "chair", "cow", "diningtable", 
                  "dog", "horse", "motorbike", "person", "pottedplant", 
@@ -110,6 +105,7 @@ def count_bboxs(training_annotation_path, training_images_dir):
             class_counts[classes_name[class_label]] += 1
 
     return class_counts, image_name_dict
+
 
  
 def _add_alpha_channel(img):
@@ -197,7 +193,7 @@ def _resize_with_aspect_ratio(image, new_width):
     return resized_image
 
 
-def paste_image(background_path, sticker_path, new_img_path,new_width_sticker, x_pos, y_pos):
+def paste_image(background_path, sticker_path, new_img_path, new_width_sticker, x_pos, y_pos):
     """將去背的 sticker 貼到背景圖片"""
     
     background = cv.imread(background_path)
@@ -228,7 +224,7 @@ def copy_and_paste(background_path, origin_sticker_path, sticker_path, output_pa
     return new_img, sticker_x_min, sticker_x_max, sticker_y_min, sticker_y_max
 
 
-# if __name__=="__main__":
+if __name__=="__main__":
     # background_path = './dataset/VOCdevkit_train/VOC2007/JPEGImages/000009.jpg'
     # origin_sticker_path = './dataset/VOCdevkit_train/VOC2007/JPEGImages/000007.jpg'
     # sticker_path = './output_car.png'
@@ -240,8 +236,11 @@ def copy_and_paste(background_path, origin_sticker_path, sticker_path, output_pa
     # new_img, sticker_x_min, sticker_x_max, sticker_y_min, sticker_y_max = copy_and_paste(background_path, origin_sticker_path, sticker_path, new_img_path, new_width_sticker, x_pos, y_pos)
     # plt.imshow(cv.cvtColor(new_img, cv.COLOR_BGR2RGB))
     # plt.show()
-    # training_annotation_path = '/home/s111062588/Deep-Learning/Competition/Comp02/pascal_voc_training_data.txt'
-    # training_images_dir = '/home/s111062588/Deep-Learning/Competition/Comp02/VOCdevkit_train/VOC2007/JPEGImages/'
-    # cut_bboxs(training_annotation_path, training_images_dir)
-    # count_bboxs(training_annotation_path, training_images_dir)
+    
+    
+    training_annotation_path = './pascal_voc_training_data.txt'
+    training_images_dir = './VOCdevkit_train/VOC2007/JPEGImages/'
+    original_stickers_root_dir = './bboxs/original_stickers/'
+    cut_bboxes(training_annotation_path, training_images_dir, original_stickers_root_dir)
+    # count_bboxes(training_annotation_path, training_images_dir)
 
