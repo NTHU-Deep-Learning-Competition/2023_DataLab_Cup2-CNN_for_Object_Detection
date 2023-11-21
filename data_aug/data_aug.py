@@ -278,7 +278,8 @@ class RandomTranslate(object):
 
         else:
             assert self.translate > 0 and self.translate < 1
-            self.translate = (-self.translate, self.translate)
+            # self.translate = (-self.translate, self.translate)
+            self.translate = (self.translate, self.translate)
             
             
         self.diff = diff
