@@ -6,6 +6,7 @@ VOCdevkit_test
 VOCdevkit_train
 *.txt
 *.csv
+output/
 
 __pycache__
 bboxs/
