@@ -12,7 +12,6 @@ __pycache__
 bboxs/
 reference/
 Comp02_tutorial.ipynb
-data_aug/
 copy_paste.ipynb
 *.csv
 *.jpg

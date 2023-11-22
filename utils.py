@@ -49,9 +49,10 @@ def cut_bboxes(training_annotation_path, training_images_dir, original_stickers_
         
         # bounding boxs
         bounding_boxes = [int(num) for num in info[1:]]
-        bounding_boxes = [bounding_boxes[i:i + 5] for i in range(0, len(bounding_boxes), 5)]
-        # print(bounding_boxes)
-        image_name_dict[image_name] = bounding_boxes
+        bounding_boxes = np.array(bounding_boxes).reshape((-1, 5))
+        # bounding_boxes = [bounding_boxes[i:i + 5] for i in range(0, len(bounding_boxes), 5)]
+        
+        image_name_dict[image_name] = bounding_boxes.astype(float)
         
         for i, bbox in enumerate(bounding_boxes):
             x_min, y_min, x_max, y_max, class_label = bbox
@@ -95,9 +96,10 @@ def count_bboxes(training_annotation_path, training_images_dir):
      
         # bounding boxs
         bounding_boxes = [int(num) for num in info[1:]]
-        bounding_boxes = [bounding_boxes[i:i + 5] for i in range(0, len(bounding_boxes), 5)]
+        bounding_boxes = np.array(bounding_boxes).reshape((-1, 5))
+        # bounding_boxes = [bounding_boxes[i:i + 5] for i in range(0, len(bounding_boxes), 5)]
         # print(bounding_boxes)
-        image_name_dict[image_name] = bounding_boxes
+        image_name_dict[image_name] = bounding_boxes.astype(float)
         
         for i, bbox in enumerate(bounding_boxes):
             x_min, y_min, x_max, y_max, class_label = bbox
@@ -238,8 +240,8 @@ if __name__=="__main__":
     # plt.show()
     
     
-    training_annotation_path = './pascal_voc_training_data.txt'
-    training_images_dir = './VOCdevkit_train/VOC2007/JPEGImages/'
+    training_annotation_path = './dataset/pascal_voc_training_data.txt'
+    training_images_dir = './dataset/VOCdevkit_train/VOC2007/JPEGImages/'
     original_stickers_root_dir = './bboxs/original_stickers/'
     cut_bboxes(training_annotation_path, training_images_dir, original_stickers_root_dir)
     # count_bboxes(training_annotation_path, training_images_dir)
